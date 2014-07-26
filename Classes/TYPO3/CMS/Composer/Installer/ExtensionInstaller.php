@@ -115,7 +115,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return bool
 	 */
 	public function isInstalled(\Composer\Repository\InstalledRepositoryInterface $repo, PackageInterface $package) {
-		$this->log(__METHOD__ . 'is installed: ' . $package->getName())
+		$this->log(__METHOD__ . 'is installed: ' . $package->getName());
 		return $repo->hasPackage($package) && is_readable($this->getInstallPath($package));
 	}
 
