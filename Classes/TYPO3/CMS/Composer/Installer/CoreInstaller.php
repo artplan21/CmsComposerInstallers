@@ -1,6 +1,7 @@
 <?php
 namespace TYPO3\CMS\Composer\Installer;
 
+use Composer\Composer;
 /***************************************************************
  * Copyright notice
  *
@@ -37,6 +38,11 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 	const TYPO3_INDEX_PHP	= 'index.php';
 
 	/**
+	 * @var \Composer\IO\IOInterface
+	 */
+	protected $io;
+
+	/**
 	 * @var \Composer\Composer
 	 */
 	protected $composer;
@@ -71,8 +77,8 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param \Composer\Composer $composer
 	 * @param Util\Filesystem $filesystem
 	 */
-	public function __construct(\Composer\Composer $composer, Util\Filesystem $filesystem, CoreInstaller\GetTypo3OrgService $getTypo3OrgService) {
-
+	public function __construct(\Composer\IO\IOInterface $io, \Composer\Composer $composer, Util\Filesystem $filesystem, CoreInstaller\GetTypo3OrgService $getTypo3OrgService) {
+		$this->io = $io;
 		$this->composer = $composer;
 		$this->downloadManager = $composer->getDownloadManager();
 		$this->filesystem = $filesystem;
@@ -98,7 +104,7 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return bool
 	 */
 	public function isInstalled(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $package) {
-		echo __METHOD__ . 'is installed: ' . $package->getName() . PHP_EOL;
+		$this->log(__METHOD__ . 'is installed: ' . $package->getName());
 		return $repo->hasPackage($package)
 			&& is_readable($this->getInstallPath($package));
 	}
@@ -110,7 +116,7 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param \Composer\Package\PackageInterface $package package instance
 	 */
 	public function install(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $package) {
-		echo __METHOD__ . 'install: ' . $package->getName() . PHP_EOL;
+		$this->log(__METHOD__ . 'install: ' . $package->getName());
 		$this->getTypo3OrgService->addDistToPackage($package);
 
 		$this->installCode($package);
@@ -128,7 +134,7 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param \Composer\Package\PackageInterface $target updated version
 	 */
 	public function update(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $initial, \Composer\Package\PackageInterface $target) {
-		echo __METHOD__ . 'update: ' . $target->getName() . PHP_EOL;
+		$this->log(__METHOD__ . 'update: ' . $target->getName());
 		$this->getTypo3OrgService->addDistToPackage($initial);
 		$this->getTypo3OrgService->addDistToPackage($target);
 
@@ -147,7 +153,7 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param \Composer\Package\PackageInterface $package package instance
 	 */
 	public function uninstall(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $package) {
-		echo __METHOD__ . 'uninstall: ' . $package->getName() . PHP_EOL;
+		$this->log(__METHOD__ . 'uninstall: ' . $package->getName());
 		if (!$repo->hasPackage($package)) {
 			throw new \InvalidArgumentException('Package is not installed: '.$package);
 		}
@@ -163,7 +169,7 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return string
 	 */
 	public function getInstallPath(\Composer\Package\PackageInterface $package) {
-		echo __METHOD__ . 'get install path: ' . $package->getName() . PHP_EOL;
+		$this->log(__METHOD__ . 'get install path: ' . $package->getName());
 		return Util\Composer::getExtraInstallerPath(
 		    array($package, $this->composer->getPackage()),
 		    self::$extraInstallerPathFilter

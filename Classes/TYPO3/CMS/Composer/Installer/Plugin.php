@@ -45,6 +45,7 @@ class Plugin implements PluginInterface {
 			->getInstallationManager()
 			->addInstaller(
 				new CoreInstaller(
+					$io,
 					$composer,
 					$filesystem,
 					new CoreInstaller\GetTypo3OrgService($io)
@@ -53,12 +54,12 @@ class Plugin implements PluginInterface {
 		$composer
 			->getInstallationManager()
 			->addInstaller(
-				new ExtensionInstaller($composer, $filesystem)
+				new ExtensionInstaller($io, $composer, $filesystem)
 			);
 		$composer
 			->getInstallationManager()
 			->addInstaller(
-				new DistributionInstaller($composer, $filesystem)
+				new DistributionInstaller($io, $composer, $filesystem)
 			);
 		$composer
 			->getDownloadManager()

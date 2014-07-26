@@ -47,6 +47,11 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	protected $initialExtensionDir;
 
 	/**
+	 * @var \Composer\IO\IOInterface
+	 */
+	protected $io;
+
+	/**
 	 * @var \Composer\Composer
 	 */
 	protected $composer;
@@ -76,11 +81,12 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param \Composer\Composer $composer
 	 * @param \Composer\Util\Filesystem $filesystem
 	 */
-	public function __construct(\Composer\Composer $composer, \Composer\Util\Filesystem $filesystem = NULL) {
+	public function __construct(\Composer\IO\IOInterface $io, \Composer\Composer $composer, \Composer\Util\Filesystem $filesystem = NULL) {
 
+		$this->io = $io;
 		$this->composer = $composer;
-		$this->downloadManager = $composer->getDownloadManager();
 
+		$this->downloadManager = $composer->getDownloadManager();
 		$this->filesystem = $filesystem ? : new \Composer\Util\Filesystem();
 
 		$this->initialExtensionDir =
@@ -109,7 +115,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return bool
 	 */
 	public function isInstalled(\Composer\Repository\InstalledRepositoryInterface $repo, PackageInterface $package) {
-		echo __METHOD__ . 'is installed: ' . $package->getName() . PHP_EOL;
+		$this->log(__METHOD__ . 'is installed: ' . $package->getName())
 		return $repo->hasPackage($package) && is_readable($this->getInstallPath($package));
 	}
 
@@ -120,7 +126,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param PackageInterface $package package instance
 	 */
 	public function install(\Composer\Repository\InstalledRepositoryInterface $repo, PackageInterface $package) {
-		echo __METHOD__ . 'install: ' . $package->getName() . PHP_EOL;
+		$this->log(__METHOD__ . 'install: ' . $package->getName());
 
 		$this->initializeExtensionDir($package);
 
@@ -140,7 +146,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @throws \InvalidArgumentException if $initial package is not installed
 	 */
 	public function update(\Composer\Repository\InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target) {
-		echo __METHOD__ . 'update: ' . $target->getName() . PHP_EOL;
+		$this->log(__METHOD__ . 'update: ' . $target->getName());
 		if (!$repo->hasPackage($initial)) {
 			throw new \InvalidArgumentException('Package is not installed: ' . $initial);
 		}
@@ -163,7 +169,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @throws \InvalidArgumentException if $initial package is not installed
 	 */
 	public function uninstall(\Composer\Repository\InstalledRepositoryInterface $repo, PackageInterface $package) {
-		echo __METHOD__ . 'uninstall: ' . $package->getName() . PHP_EOL;
+		$this->log(__METHOD__ . 'uninstall: ' . $package->getName());
 		if (!$repo->hasPackage($package)) {
 			throw new \InvalidArgumentException('Package is not installed: ' . $package);
 		}
@@ -179,7 +185,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return string           path
 	 */
 	public function getInstallPath(PackageInterface $package) {
-		echo __METHOD__ . 'get install path: ' . $package->getName() . PHP_EOL;
+		$this->log(__METHOD__ . 'get install path: ' . $package->getName());
 		$extensionKey = '';
 		foreach ($package->getReplaces() as $packageName => $version) {
 			if (strpos($packageName, '/') === FALSE) {
@@ -252,5 +258,11 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 			array($package, $this->composer->getPackage()),
 			self::$extraInstallerPathFilter
 		) . $this->extensionDir;
+	}
+
+	protected function log($message) {
+		if ($this->io->isVerbose()) {
+			$this->io->write($message);
+		}
 	}
 }
