@@ -109,6 +109,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return bool
 	 */
 	public function isInstalled(\Composer\Repository\InstalledRepositoryInterface $repo, PackageInterface $package) {
+		echo __METHOD__ . 'is installed: ' . $package->getName() . PHP_EOL;
 		return $repo->hasPackage($package) && is_readable($this->getInstallPath($package));
 	}
 
@@ -119,6 +120,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param PackageInterface $package package instance
 	 */
 	public function install(\Composer\Repository\InstalledRepositoryInterface $repo, PackageInterface $package) {
+		echo __METHOD__ . 'install: ' . $package->getName() . PHP_EOL;
 
 		$this->initializeExtensionDir($package);
 
@@ -138,6 +140,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @throws \InvalidArgumentException if $initial package is not installed
 	 */
 	public function update(\Composer\Repository\InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target) {
+		echo __METHOD__ . 'update: ' . $target->getName() . PHP_EOL;
 		if (!$repo->hasPackage($initial)) {
 			throw new \InvalidArgumentException('Package is not installed: ' . $initial);
 		}
@@ -160,6 +163,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @throws \InvalidArgumentException if $initial package is not installed
 	 */
 	public function uninstall(\Composer\Repository\InstalledRepositoryInterface $repo, PackageInterface $package) {
+		echo __METHOD__ . 'uninstall: ' . $package->getName() . PHP_EOL;
 		if (!$repo->hasPackage($package)) {
 			throw new \InvalidArgumentException('Package is not installed: ' . $package);
 		}
@@ -175,6 +179,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return string           path
 	 */
 	public function getInstallPath(PackageInterface $package) {
+		echo __METHOD__ . 'get install path: ' . $package->getName() . PHP_EOL;
 		$extensionKey = '';
 		foreach ($package->getReplaces() as $packageName => $version) {
 			if (strpos($packageName, '/') === FALSE) {

@@ -98,6 +98,7 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return bool
 	 */
 	public function isInstalled(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $package) {
+		echo __METHOD__ . 'is installed: ' . $package->getName() . PHP_EOL;
 		return $repo->hasPackage($package)
 			&& is_readable($this->getInstallPath($package));
 	}
@@ -109,6 +110,7 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param \Composer\Package\PackageInterface $package package instance
 	 */
 	public function install(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $package) {
+		echo __METHOD__ . 'install: ' . $package->getName() . PHP_EOL;
 		$this->getTypo3OrgService->addDistToPackage($package);
 
 		$this->installCode($package);
@@ -126,6 +128,7 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param \Composer\Package\PackageInterface $target updated version
 	 */
 	public function update(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $initial, \Composer\Package\PackageInterface $target) {
+		echo __METHOD__ . 'update: ' . $target->getName() . PHP_EOL;
 		$this->getTypo3OrgService->addDistToPackage($initial);
 		$this->getTypo3OrgService->addDistToPackage($target);
 
@@ -144,6 +147,7 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param \Composer\Package\PackageInterface $package package instance
 	 */
 	public function uninstall(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $package) {
+		echo __METHOD__ . 'uninstall: ' . $package->getName() . PHP_EOL;
 		if (!$repo->hasPackage($package)) {
 			throw new \InvalidArgumentException('Package is not installed: '.$package);
 		}
@@ -159,6 +163,7 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return string
 	 */
 	public function getInstallPath(\Composer\Package\PackageInterface $package) {
+		echo __METHOD__ . 'get install path: ' . $package->getName() . PHP_EOL;
 		return Util\Composer::getExtraInstallerPath(
 		    array($package, $this->composer->getPackage()),
 		    self::$extraInstallerPathFilter
