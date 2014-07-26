@@ -38,6 +38,7 @@ final class Composer {
 	static public function getExtraInstallerPath(array $packages, array $filters) {
 		foreach($packages as /** @var \Composer\Package\PackageInterface */ $package) {
 			$extra = $package->getExtra();
+			echo PHP_EOL; var_dump($extra); echo PHP_EOL;
 			if (empty($extra) || !isset($extra['installer-paths']) || empty($extra['installer-paths'])) {
 				continue ;
 			}
