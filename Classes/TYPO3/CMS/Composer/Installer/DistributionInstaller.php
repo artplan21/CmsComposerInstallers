@@ -97,6 +97,7 @@ class DistributionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return bool
 	 */
 	public function isInstalled(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $package) {
+		echo 'is installed: ' . $package->getName() . PHP_EOL;
 		return $repo->hasPackage($package)
 			&& is_readable($this->getInstallPath($package))
 			&& $this->filesystem->allFilesExist($this->getSymlinks($package));
@@ -109,6 +110,7 @@ class DistributionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param \Composer\Package\PackageInterface $package package instance
 	 */
 	public function install(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $package) {
+		echo 'install: ' . $package->getName() . PHP_EOL;
 
 		$symlinks = $this->getSymlinks($package);
 
@@ -131,6 +133,7 @@ class DistributionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param \Composer\Package\PackageInterface $target updated version
 	 */
 	public function update(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $initial, \Composer\Package\PackageInterface $target) {
+		echo 'update: ' . $target->getName() . PHP_EOL;
 
 		$symlinks = $this->getSymlinks($initial);
 		if ($this->filesystem->someFilesExist($symlinks)) {
@@ -157,6 +160,7 @@ class DistributionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param \Composer\Package\PackageInterface $package package instance
 	 */
 	public function uninstall(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $package) {
+		echo 'uninstall: ' . $package->getName() . PHP_EOL;
 		if (!$repo->hasPackage($package)) {
 			throw new \InvalidArgumentException('Package is not installed: '.$package);
 		}
@@ -175,10 +179,12 @@ class DistributionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return string
 	 */
 	public function getInstallPath(\Composer\Package\PackageInterface $package) {
-		return Util\Composer::getExtraInstallerPath(
+		$installPath = Util\Composer::getExtraInstallerPath(
 			array($package, $this->composer->getPackage()),
 			self::$extraInstallerPathFilter
 		);
+		echo 'get install path: ' . $installPath . PHP_EOL;
+		return $installPath;
 	}
 
 	/**
