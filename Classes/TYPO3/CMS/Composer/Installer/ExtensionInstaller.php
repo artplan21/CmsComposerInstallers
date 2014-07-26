@@ -42,6 +42,11 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	protected $extensionDir;
 
 	/**
+	 * @var string
+	 */
+	protected $initialExtensionDir;
+
+	/**
 	 * @var \Composer\Composer
 	 */
 	protected $composer;
@@ -57,14 +62,28 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	protected $filesystem;
 
 	/**
+	 * @var array
+	 */
+	public static $extraInstallerPathFilter = array(
+		'type:typo3-cms-extension',
+		'type:typo3-cms-distribution',
+		'name:typo3-cms-distribution',
+		'type:typo3-cms-core',
+		'typo3/cms'
+	);
+
+	/**
 	 * @param \Composer\Composer $composer
 	 * @param \Composer\Util\Filesystem $filesystem
 	 */
 	public function __construct(\Composer\Composer $composer, \Composer\Util\Filesystem $filesystem = NULL) {
+
 		$this->composer = $composer;
 		$this->downloadManager = $composer->getDownloadManager();
 
 		$this->filesystem = $filesystem ? : new \Composer\Util\Filesystem();
+
+		$this->initialExtensionDir =
 		$this->extensionDir = self::TYPO3_CONF_DIR . DIRECTORY_SEPARATOR . self::TYPO3_EXT_DIR;
 	}
 
@@ -76,6 +95,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 */
 	public function supports($packageType) {
 		return $packageType !== 'typo3-cms-core'
+		 	&& $packageType !== 'typo3-cms-distribution'
 			// strncmp is about 20% faster than substr
 			&& strncmp('typo3-cms-', $packageType, 10) === 0;
 	}
@@ -99,7 +119,8 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param PackageInterface $package package instance
 	 */
 	public function install(\Composer\Repository\InstalledRepositoryInterface $repo, PackageInterface $package) {
-		$this->initializeExtensionDir();
+
+		$this->initializeExtensionDir($package);
 
 		$this->installCode($package);
 		if (!$repo->hasPackage($package)) {
@@ -121,7 +142,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 			throw new \InvalidArgumentException('Package is not installed: ' . $initial);
 		}
 
-		$this->initializeExtensionDir();
+		$this->initializeExtensionDir($target);
 
 		$this->updateCode($initial, $target);
 		$repo->removePackage($initial);
@@ -165,7 +186,8 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 			list(, $extensionKey) = explode('/', $package->getName(), 2);
 			$extensionKey = str_replace('-', '_', $extensionKey);
 		}
-		return $this->extensionDir . DIRECTORY_SEPARATOR . $extensionKey;
+
+		return $this->getExtensionDir($package) . DIRECTORY_SEPARATOR . $extensionKey;
 	}
 
 	/**
@@ -207,10 +229,23 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	}
 
 	/**
-	 *
+	 * @param \Composer\Package\PackageInterface $package
 	 */
-	protected function initializeExtensionDir() {
-		$this->filesystem->ensureDirectoryExists($this->extensionDir);
-		$this->extensionDir = realpath($this->extensionDir);
+	protected function initializeExtensionDir(\Composer\Package\PackageInterface $package) {
+		$this->extensionDir = $this->initialExtensionDir;
+		$extensionDir = $this->getExtensionDir($package);
+		$this->filesystem->ensureDirectoryExists($extensionDir);
+		$this->extensionDir = realpath($extensionDir);
+	}
+
+	/**
+	 * @param \Composer\Package\PackageInterface $package
+	 * @return string
+	 */
+	protected function getExtensionDir(\Composer\Package\PackageInterface $package) {
+		return Util\Composer::getExtraInstallerPath(
+			array($package, $this->composer->getPackage()),
+			self::$extraInstallerPathFilter
+		) . $this->extensionDir;
 	}
 }

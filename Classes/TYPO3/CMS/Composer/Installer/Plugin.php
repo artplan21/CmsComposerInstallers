@@ -56,6 +56,11 @@ class Plugin implements PluginInterface {
 				new ExtensionInstaller($composer, $filesystem)
 			);
 		$composer
+			->getInstallationManager()
+			->addInstaller(
+				new DistributionInstaller($composer, $filesystem)
+			);
+		$composer
 			->getDownloadManager()
 			->setDownloader(
 				't3x',
