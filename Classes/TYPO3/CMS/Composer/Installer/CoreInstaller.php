@@ -223,7 +223,7 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 
 		$symlinks = array();
 		foreach($this->symlinks as $sourcePath => $targetPath) {
-			$symlinks[$sourcePrefix . $sourcePath] = $targetPrefix . $targetPath;
+			$symlinks[realpath($sourcePrefix . $sourcePath)] = $targetPrefix . $targetPath;
 		}
 		return $symlinks;
 	}
