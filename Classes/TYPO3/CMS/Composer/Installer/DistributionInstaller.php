@@ -208,6 +208,16 @@ class DistributionInstaller implements \Composer\Installer\InstallerInterface {
 		}
 		return $symlinks;
 	}
+
+	/**
+	 * @param string $message
+	 * @return void
+	 */
+	protected function log($message) {
+		if ($this->io->isVerbose()) {
+			$this->io->write($message);
+		}
+	}
 }
 
 ?>

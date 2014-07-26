@@ -217,6 +217,16 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 		$downloadPath = $this->getInstallPath($package);
 		$this->downloadManager->remove($package, $downloadPath);
 	}
+
+	/**
+	 * @param string $message
+	 * @return void
+	 */
+	protected function log($message) {
+		if ($this->io->isVerbose()) {
+			$this->io->write($message);
+		}
+	}
 }
 
 ?>

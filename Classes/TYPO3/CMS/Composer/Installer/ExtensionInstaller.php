@@ -260,6 +260,10 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 		) . $this->extensionDir;
 	}
 
+	/**
+	 * @param string $message
+	 * @return void
+	 */
 	protected function log($message) {
 		if ($this->io->isVerbose()) {
 			$this->io->write($message);
