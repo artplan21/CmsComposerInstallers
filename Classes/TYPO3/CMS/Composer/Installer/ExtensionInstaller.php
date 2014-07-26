@@ -115,7 +115,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return bool
 	 */
 	public function isInstalled(\Composer\Repository\InstalledRepositoryInterface $repo, PackageInterface $package) {
-		$this->log(__METHOD__ . 'is installed: ' . $package->getName());
+		$this->log(__METHOD__ . $package->getName());
 		return $repo->hasPackage($package) && is_readable($this->getInstallPath($package));
 	}
 
@@ -126,7 +126,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param PackageInterface $package package instance
 	 */
 	public function install(\Composer\Repository\InstalledRepositoryInterface $repo, PackageInterface $package) {
-		$this->log(__METHOD__ . 'install: ' . $package->getName());
+		$this->log(__METHOD__ . $package->getName());
 
 		$this->initializeExtensionDir($package);
 
@@ -146,7 +146,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @throws \InvalidArgumentException if $initial package is not installed
 	 */
 	public function update(\Composer\Repository\InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target) {
-		$this->log(__METHOD__ . 'update: ' . $target->getName());
+		$this->log(__METHOD__ . $target->getName());
 		if (!$repo->hasPackage($initial)) {
 			throw new \InvalidArgumentException('Package is not installed: ' . $initial);
 		}
@@ -169,7 +169,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @throws \InvalidArgumentException if $initial package is not installed
 	 */
 	public function uninstall(\Composer\Repository\InstalledRepositoryInterface $repo, PackageInterface $package) {
-		$this->log(__METHOD__ . 'uninstall: ' . $package->getName());
+		$this->log(__METHOD__ . $package->getName());
 		if (!$repo->hasPackage($package)) {
 			throw new \InvalidArgumentException('Package is not installed: ' . $package);
 		}
@@ -185,7 +185,7 @@ class ExtensionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return string           path
 	 */
 	public function getInstallPath(PackageInterface $package) {
-		$this->log(__METHOD__ . 'get install path: ' . $package->getName());
+		$this->log(__METHOD__ . $package->getName());
 		$extensionKey = '';
 		foreach ($package->getReplaces() as $packageName => $version) {
 			if (strpos($packageName, '/') === FALSE) {

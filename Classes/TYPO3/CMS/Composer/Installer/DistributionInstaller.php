@@ -103,7 +103,7 @@ class DistributionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return bool
 	 */
 	public function isInstalled(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $package) {
-		$this->log(__METHOD__ . 'is installed: ' . $package->getName());
+		$this->log(__METHOD__ . $package->getName());
 		return $repo->hasPackage($package)
 			&& is_readable($this->getInstallPath($package))
 			&& $this->filesystem->allFilesExist($this->getSymlinks($package));
@@ -116,7 +116,7 @@ class DistributionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param \Composer\Package\PackageInterface $package package instance
 	 */
 	public function install(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $package) {
-		$this->log(__METHOD__ . 'install: ' . $package->getName());
+		$this->log(__METHOD__ . $package->getName());
 
 		$symlinks = $this->getSymlinks($package);
 
@@ -139,7 +139,7 @@ class DistributionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param \Composer\Package\PackageInterface $target updated version
 	 */
 	public function update(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $initial, \Composer\Package\PackageInterface $target) {
-		$this->log(__METHOD__ . 'update: ' . $target->getName());
+		$this->log(__METHOD__ . $target->getName());
 
 		$symlinks = $this->getSymlinks($initial);
 		if ($this->filesystem->someFilesExist($symlinks)) {
@@ -166,7 +166,7 @@ class DistributionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @param \Composer\Package\PackageInterface $package package instance
 	 */
 	public function uninstall(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $package) {
-		$this->log(__METHOD__ . 'uninstall: ' . $package->getName());
+		$this->log(__METHOD__ . $package->getName());
 		if (!$repo->hasPackage($package)) {
 			throw new \InvalidArgumentException('Package is not installed: '.$package);
 		}
@@ -185,7 +185,7 @@ class DistributionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return string
 	 */
 	public function getInstallPath(\Composer\Package\PackageInterface $package) {
-		$this->log(__METHOD__ . 'get install path: ' . $package->getName());
+		$this->log(__METHOD__ . $package->getName());
 		return Util\Composer::getExtraInstallerPath(
 			array($package, $this->composer->getPackage()),
 			self::$extraInstallerPathFilter
