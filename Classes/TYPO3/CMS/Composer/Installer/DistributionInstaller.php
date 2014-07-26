@@ -33,6 +33,11 @@ namespace TYPO3\CMS\Composer\Installer;
  */
 class DistributionInstaller implements \Composer\Installer\InstallerInterface {
 
+	const TYPO3_CONF_DIR = 'typo3_conf';
+
+	/**
+	 * @var array
+	 */
 	protected $symlinks = array();
 
 	/**
@@ -77,10 +82,12 @@ class DistributionInstaller implements \Composer\Installer\InstallerInterface {
 		$this->downloadManager = $composer->getDownloadManager();
 		$this->filesystem = $filesystem;
 		$this->symlinks = array(
-			CoreInstaller::TYPO3_SRC_DIR . DIRECTORY_SEPARATOR . CoreInstaller::TYPO3_INDEX_PHP
-				=> CoreInstaller::TYPO3_INDEX_PHP,
-			CoreInstaller::TYPO3_SRC_DIR . DIRECTORY_SEPARATOR . CoreInstaller::TYPO3_DIR
-				=> CoreInstaller::TYPO3_DIR
+//			ConfigurationInstaller::CONF_DIR . DIRECTORY_SEPARATOR . ConfigurationInstaller::TYPO3_DEVELOPMENT
+//				=>self::TYPO3_CONF_DIR . DIRECTORY_SEPARATOR . ConfigurationInstaller::TYPO3_DEVELOPMENT
+//			ConfigurationInstaller::CONF_DIR . DIRECTORY_SEPARATOR . ConfigurationInstaller::TYPO3_TESTING
+//				=>self::TYPO3_CONF_DIR . DIRECTORY_SEPARATOR . ConfigurationInstaller::TYPO3_TESTING
+//			ConfigurationInstaller::CONF_DIR . DIRECTORY_SEPARATOR . ConfigurationInstaller::TYPO3_PRODUCTION
+//				=>self::TYPO3_CONF_DIR . DIRECTORY_SEPARATOR . ConfigurationInstaller::TYPO3_PRODUCTION
 		);
 	}
 
@@ -198,8 +205,10 @@ class DistributionInstaller implements \Composer\Installer\InstallerInterface {
 	 * @return array
 	 */
 	protected function getSymlinks(\Composer\Package\PackageInterface $package) {
+		return array();
+
 		$packages = array($package, $this->composer->getPackage());
-		$sourcePrefix = Util\Composer::getExtraInstallerPath($packages, CoreInstaller::$extraInstallerPathFilter);
+		$sourcePrefix = Util\Composer::getExtraInstallerPath($packages, ConfigurationInstaller::$extraInstallerPathFilter);
 		$targetPrefix = Util\Composer::getExtraInstallerPath($packages, self::$extraInstallerPathFilter);
 
 		$symlinks = array();

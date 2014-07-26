@@ -1,7 +1,6 @@
 <?php
 namespace TYPO3\CMS\Composer\Installer;
 
-use Composer\Composer;
 /***************************************************************
  * Copyright notice
  *
@@ -36,6 +35,11 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 	const TYPO3_SRC_DIR		= 'typo3_src';
 	const TYPO3_DIR			= 'typo3';
 	const TYPO3_INDEX_PHP	= 'index.php';
+
+	/**
+	 * @var array
+	 */
+	protected $symlinks = array();
 
 	/**
 	 * @var \Composer\IO\IOInterface
@@ -83,6 +87,12 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 		$this->downloadManager = $composer->getDownloadManager();
 		$this->filesystem = $filesystem;
 		$this->getTypo3OrgService = $getTypo3OrgService;
+		$this->symlinks = array(
+			self::TYPO3_SRC_DIR . DIRECTORY_SEPARATOR . self::TYPO3_INDEX_PHP
+				=> self::TYPO3_INDEX_PHP,
+			self::TYPO3_SRC_DIR . DIRECTORY_SEPARATOR . self::TYPO3_DIR
+				=> self::TYPO3_DIR
+		);
 	}
 
 	/**
@@ -106,7 +116,8 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 	public function isInstalled(\Composer\Repository\InstalledRepositoryInterface $repo, \Composer\Package\PackageInterface $package) {
 		$this->log(__METHOD__ . $package->getName());
 		return $repo->hasPackage($package)
-			&& is_readable($this->getInstallPath($package));
+			&& is_readable($this->getInstallPath($package))
+			&& $this->filesystem->allFilesExist($this->getSymlinks($package));
 	}
 
 	/**
@@ -119,7 +130,15 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 		$this->log(__METHOD__ . $package->getName());
 		$this->getTypo3OrgService->addDistToPackage($package);
 
+		$symlinks = $this->getSymlinks($package);
+
+		if ($this->filesystem->someFilesExist($symlinks)) {
+			$this->filesystem->removeSymlinks($symlinks);
+		}
+
 		$this->installCode($package);
+
+		$this->filesystem->establishSymlinks($symlinks);
 
 		if (!$repo->hasPackage($package)) {
 			$repo->addPackage(clone $package);
@@ -138,7 +157,19 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 		$this->getTypo3OrgService->addDistToPackage($initial);
 		$this->getTypo3OrgService->addDistToPackage($target);
 
+		$symlinks = $this->getSymlinks($initial);
+		if ($this->filesystem->someFilesExist($symlinks)) {
+			$this->filesystem->removeSymlinks($symlinks);
+		}
+
+		$symlinks = $this->getSymlinks($target);
+		if ($this->filesystem->someFilesExist($symlinks)) {
+			$this->filesystem->removeSymlinks($symlinks);
+		}
+
 		$this->updateCode($initial, $target);
+
+		$this->filesystem->establishSymlinks($symlinks);
 
 		$repo->removePackage($initial);
 		if (!$repo->hasPackage($target)) {
@@ -157,6 +188,10 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 		if (!$repo->hasPackage($package)) {
 			throw new \InvalidArgumentException('Package is not installed: '.$package);
 		}
+		$symlinks = $this->getSymlinks($package);
+		if ($this->filesystem->someFilesExist($symlinks)) {
+			$this->filesystem->removeSymlinks($symlinks);
+		}
 
 		$this->removeCode($package);
 		$repo->removePackage($package);
@@ -174,6 +209,23 @@ class CoreInstaller implements \Composer\Installer\InstallerInterface {
 		    array($package, $this->composer->getPackage()),
 		    self::$extraInstallerPathFilter
 		) . self::TYPO3_SRC_DIR;
+	}
+
+	/**
+	 *
+	 * @param \Composer\Package\PackageInterface $package
+	 * @return array
+	 */
+	protected function getSymlinks(\Composer\Package\PackageInterface $package) {
+		$packages = array($package, $this->composer->getPackage());
+		$sourcePrefix = Util\Composer::getExtraInstallerPath($packages, self::$extraInstallerPathFilter);
+		$targetPrefix = Util\Composer::getExtraInstallerPath($packages, DistributionInstaller::$extraInstallerPathFilter);
+
+		$symlinks = array();
+		foreach($this->symlinks as $sourcePath => $targetPath) {
+			$symlinks[$sourcePrefix . $sourcePath] = $targetPrefix . $targetPath;
+		}
+		return $symlinks;
 	}
 
 	/**
